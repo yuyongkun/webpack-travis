@@ -1,0 +1,431 @@
+一，devtool和mode
+
+    1，devtool配置项
+    开发环境
+    eval, eval-source-map, cheap-eval-source-map, cheap-module-eval-source-map, cheap-module-source-map
+    生产环境
+    source-map hidden-source-map nosources-source-map
+
+    2，mode配置项
+    development:启用 NamedChunksPlugin 和 NamedModulesPlugin
+    production: 启用 FlagDependencyUsagePlugin ， FlagIncludedChunksPlugin ， ModuleConcatenationPlugin ，
+    NoEmitOnErrorsPlugin ， OccurrenceOrderPlugin ， SideEffectsFlagPlugin 和 TerserPlugin 
+
+二，loader【在webpack中loader是从右往左链式调用的】
+
+    1，css-loader
+    用来加载.css文件，并且转换成commonjs对象
+    2，style-loader
+    将样式通过style标签插入到head中
+    3，file-loader,url-loader
+    都可以用来解析图片和字体，区别是url-loader可以设置较小资源自动base64
+    4，babel-loader
+    用来解析es6
+
+三，html-webpack-plugin
+
+    1，title
+    生成html文件的标题
+    2，template
+    html模板所在的文件路径
+
+    3，filename
+    输出的html的文件名称
+
+    4，chunks
+    chunks主要用于多入口文件，当你有多个入口文件，那就回编译后生成多个打包后的文件，那么chunks 就能选择你要使用那些js文件。
+
+    5，excludeChunks
+    排除掉一些js
+
+    6，inject: 
+    注入选项。有四个选项值 true, body, head, false.
+    true：默认值，script标签位于html文件的 body 底部
+    body：script标签位于html文件的 body 底部（同 true）
+    head：script 标签位于 head 标签内
+    false：不插入生成的 js 文件，只是单纯的生成一个 html 文件（这个几乎不会用到的）
+
+    7，favicon
+    给生成的 html 文件生成一个 favicon。属性值为 favicon 文件所在的路径名
+
+    8，hash
+    hash选项的作用是 给生成的 js 文件一个独特的 hash 值，该 hash 值是该次 webpack 编译的 hash 值。默认值为 false 
+
+    9，cache
+    默认是true的，表示内容变化的时候生成一个新的文件
+
+    10，showErrors
+    这个我们自运行项目的时候经常会用到，showErrors 的作用是，如果 webpack 编译出现错误，webpack会将错误信息包裹在一个 pre 标签内，属性的默认值为 true ，也就是显示错误信息。
+    开启这个，方便定位错误。
+
+    11，minify
+    minify的作用是对 html 文件进行压缩，minify 的属性值是一个压缩选项或者 false 。默认值为false, 不对生成的 html 文件进行压缩
+
+    下面罗列了一些常用的配置【部分省略，具体看minify的配置】：
+
+    //是否对大小写敏感，默认false
+    caseSensitive: true,
+
+    //是否简写boolean格式的属性如：disabled="disabled" 简写为disabled  默认false
+    collapseBooleanAttributes: true,
+
+    //是否去除空格，默认false
+    collapseWhitespace: true,
+
+    //是否压缩html里的css（使用clean-css进行的压缩） 默认值false；
+    minifyCSS: true,
+
+    //是否压缩html里的js（使用uglify-js进行的压缩）
+    minifyJS: true,
+
+    //Prevents the escaping of the values of attributes
+    preventAttributesEscaping: true,
+
+    //是否移除属性的引号 默认false
+    removeAttributeQuotes: true,
+
+    //是否移除注释 默认false
+    removeComments: true,
+
+    //从脚本和样式删除的注释 默认false
+    removeCommentsFromCDATA: true,
+
+    //是否删除空属性，默认false
+    removeEmptyAttributes: true,
+
+    //  若开启此项，生成的html中没有 body 和 head，html也未闭合
+    removeOptionalTags: false, 
+
+    //删除多余的属性
+    removeRedundantAttributes: true, 
+
+    //删除script的类型属性，在h5下面script的type默认值：text/javascript 默认值false
+    removeScriptTypeAttributes: true,
+
+    //删除style的类型属性， type="text/css" 同上
+    removeStyleLinkTypeAttributes: true,
+
+    //使用短的文档类型，默认false
+    useShortDoctype: true,
+
+四，文件监听
+    文件监听是在发现源文件发生变化时，自动重新构建出新的输出文件。
+
+    开始webpack文件监听的两种方式：
+    1，启动webpack时带上--watch参数
+    2，在配置文件中webpack.config.js中设置watch:true
+
+    原理：
+    轮询判断文件的最后编辑时间是否变化
+    某个文件发生了变化，并不会立即告诉监听者，而是先缓存起来，等待aggregateTimeout
+    module.exports={
+        watch:true,//默认false
+        watchOptions:{
+            ignored:/node_modules/,//忽略监听的文件或文件夹，支持正则表达式
+            aggregateTimeout:300,//文件发生变化等待300毫秒再去执行
+            poll:1000//每秒钟轮询的次数，默认1000次
+        }
+    }
+
+五，webpack热更新【webpack-dev-server】
+    使用文件监听的方式每次修改了文件之后都需要手动刷新浏览器才能看到修改效果，
+    而使用webpack热更新，每次修改了之后会自动刷新浏览器，而且因为热更新是把文件打包到内存中，所以效率上会快很多。
+
+六，文件指纹
+    常见文件指纹
+    hash:和整个项目构建相关，只要项目文件有修改，整个项目构建的hash值都会更改
+    chunkhash：和webpack打包的chunk有关，不同的entry会生成不同的chunkhash【热更新不能和chunkhash同时使用】
+    contenthash：根据文件内容来定义hash，文件内容不变，则contenthash不变
+
+七，文件压缩
+
+    html压缩：
+    配置html-webpack-plugin
+
+    js压缩：
+    uglifyjs-webpack-plugin【在webpack4.0中，内置了uglifyjs-webpack-plugin插件，设置mode为production时会自动开启】
+
+    css压缩：
+    optimize-css-assets-webpack-plugin和cssnano【cssnano为css预处理器】
+
+    new OptimizeCssAssetsPlugin({
+        assetNameRegExp:/\.css$/g,
+        cssProcessor:require('cssnano')
+    })
+
+八，PostCss插件autoprefixer
+
+    配置如下
+    {
+        loader: 'postcss-loader',
+        options: {
+            plugins: () => [
+                require('autoprefixer')({
+                    browsers: ['last 2 version', '>1%', 'ios 7']
+                })
+            ]
+        }
+    }
+
+九，移动端css单位px自动转成rem
+
+    1，使用px2rem-loader将css中px转成rem
+    {
+        loader:'px2rem-loader',
+        options:{
+            remUnit:75,
+            remPrecision:8
+        }
+    }
+    2，使用淘宝lib-flexible计算页面根元素html字体大小
+
+
+十，资源内联
+    html和js内联
+    raw-loader: 内联html
+    <script>${require('raw-loader!babel-loader!./meta.html')}</script>
+    raw-loader: 内联js
+    <script>${require('raw-loader!babel-loader!../node_modules/lib-flexible')}</script>
+十一，多页面打包
+    使用插件 html-webpack-plugin和glob
+
+    entry:glob.sync(path.join(__dirname,'./src/*/index.js'))//动态获取所有js文件
+
+十二，source map
+    eval：使用eval包裹模块代码
+    source-map：产生.map文件
+    cheap：不包含列信息
+    inline：将.map作为DataURI嵌入，不单独生成.map文件
+    module：包含loader的sourcemap
+    开发环境推荐
+        eval
+        eval-source-map
+        cheap-eval-source-map 
+        cheap-module-eval-source-map 
+        cheap-module-source-map
+    生产环境推荐
+        source-map
+        hidden-source-map
+        nosources-source-map 
+十三，公共脚本分离
+    1，SplitChunksPlugin
+        作用：用于抽离公共脚本
+        
+        SplitChunksPlugin是webpack4.0内置的，用于替换替换CommonsChunkPlugin
+
+        chunks参数说明
+        async：异步引入的库进行分离（默认）
+        initial：同步引入的库进行分离
+        all：所有引入的库进行分离（推荐）
+        optimization:{
+            splitChunks: {
+                chunks: "async",
+                minSize: 30000,
+                minChunks: 1,
+                maxAsyncRequests: 5,
+                maxInitialRequests: 3,
+                automaticNameDelimiter: '~',
+                name: true,
+                cacheGroups: {
+                    vendors: {
+                        test: /(react|react-dom)/,//
+                        name: 'vendors',
+                        chunks: 'all'
+                    }
+                }
+            }
+        }
+        
+
+
+    2，html-webpack-externals-plugin
+        作用：用于分离脚本，使其不参与打包
+        new HtmlWebpackExternalsPlugin({
+            externals: [
+                {
+                    module: 'react',
+                    entry: 'https://unpkg.com/react@16/umd/react.development.js',
+                    global: 'React',
+                },
+                {
+                    module: 'react-dom',
+                    entry: 'https://unpkg.com/react-dom@16/umd/react-dom.development.js',
+                    global: 'ReactDom',
+                },
+            ],
+        })
+
+十四，tree shaking
+    概念：一个模块可能会有多个方法，只要某个方法用到了，则整个模块都会被打包进bundle里面去，tree shaking就是只能用到的方法打包进bundle，
+        没用到的方法会在uglify阶段被擦出掉。
+    使用：webpack默认支持，在.babelrc里面设置module:false即可.
+        mode:production情况下默认开启。
+    要求：必须是es6语法，cjs语法不支持
+
+    原理：
+        利用es6模块的特点：
+            1，只能作为模块的顶层语句出现
+            2，import的模块名只能是字符串常量
+            3，import binding是immutable的
+        代码擦除：uglify阶段删除无用代码
+
+十五，Scope Hoisting使用和原理分析
+
+    问题：构建后代码存在大量的闭包代码，大量的闭包函数包含代码，导致代码体积变大，运行代码时创建的函数作用域变多，内存开销变大。
+    原理：将所有模块的代码按照引用顺序放在一个函数作用域里面，然后适当的重命名一些变量以防止变量名冲突。
+    对比：通过scope hoisting 可以减少函数声明代码和内存开销
+
+    webpack开启方式：
+    1，mode:production时自动开启scope hoisting
+    2，也可以手动开启new webpack.optimize.ModuleConcatenationPlugin()
+
+    要求：
+    必须是es6语法，cjs不支持。
+
+
+十六，代码分割和动态import
+    适用场景：抽离相同代码到一个共享块
+    脚本懒加载：使得初始下载的代码更小
+
+    动态import目前还没有原生支持，需要babel转换
+    {
+        "plugins":["@babel/plugin-syntax-dynamic-import"]
+    }
+    
+十七，webpack和eslint结合
+
+    1，行业里面eslint优秀实践规范
+        .Airbnb：
+            eslint-config-airbnb，eslint-config-airbnb-base
+        .腾讯：
+            alloyteam团队:eslint-config-alloy
+            ivweb团队：eslint-config-ivweb
+    2，指定团队的eslint规范
+        .不重复造轮子，基于eslint:recommend配置并改进
+        .能够帮助发现代码错误的规则，全部开启
+        .帮助保持团队的代码风格统一，而不是限制开发体验
+    3，eslint如何执行落地
+        .和CI/CD系统集成
+        .和webpack集成
+
+十八，webpack实现SSR打包
+    实现思路：
+        1，服务端：
+        .使用react-dom/server的renderToString方法，将react组件渲染成字符串
+        .服务端路由返回对应的数据
+        2，客户端：
+        打包出针对服务端的组件
+        
+    webpack ssr打包存在的问题
+    1，浏览器的全局变量（Node.js中没有window,document）
+        组件适配：将不兼容的组件根据打包环境进行适配
+        请求适配：将fetch或者ajax异步请求的写法改成isomorphic-fetch或者axios
+    2，样式问题（Node.js无法解析css）
+        方案一：服务端打包通过ignore-loader忽略掉css的解析
+        方案二：将style-loader替换成isomorphic-style-loader
+
+
+
+十九，npm相关
+ 
+1，添加用户：npm adduser
+2，升级版本：
+        升级补丁版本号：npm version patch
+        升级小版本号：npm version minor
+        升级大版本号：npm version major
+3，发布版本：npm publish
+
+
+常用命令：
+
+使用npm help <command>可查看某条命令的详细帮助，例如npm help install。
+
+在package.json所在目录下使用npm install . -g可先在本地安装当前命令行程序，可用于发布前的本地测试。
+
+使用npm update <package>可以把当前目录下node_modules子目录里边的对应模块更新至最新版本。
+
+使用npm update <package> -g可以把全局安装的对应命令行程序更新至最新版。
+
+使用npm cache clear可以清空NPM本地缓存，用于对付使用相同版本号发布新版本代码的人。
+
+使用npm unpublish <package>@<version>可以撤销发布自己发布过的某个版本代码。
+
+npm特殊版本说明：
+Alpha：是内部测试版,一般不向外部发布,会有很多Bug.一般只有测试人员使用
+Beta：也是测试版，这个阶段的版本会一直加入新的功能。在Alpha版之后推出
+RC：候选版本，候选版本不会再加入新的功能了，主要着重于除错
+
+二十，冒烟测试（smoke testing）
+冒烟测试是指对提交测试的软件在进行深入详细的测试之前进行的预测试，这种预测试的目的是提早暴露导致软件需要重新发布的基本功能失效等严重问题。
+
+
+二十一，Babel
+    改变：
+    1，babel从7.0开始，npm包更名为@babel/core,@babel/cli
+    2，babel从7.0移除了@babel/polyfill内的polyfills支持,现在@babel/polyfill几乎只是core-js v2的映射
+    3，babylon现在被重命名为@babel/parser
+    4，去除包名上的年份
+    5，将react和flow预设分离
+
+    常用插件
+    1.语法编译器
+    主要对JavaScript最新的语法糖进行编译，并不负责编译JavaScript新增的api和全局对象，例如let，const可以被编译，而includes，Obbject.assign等
+    并不能被编译。常用的编译器有@babel/preset-env、@babel/preset-flow、@babel/preset-react、@babel/preset-typescript
+    2.补丁编译器
+    主要用来编译JavaScript最新的api和全局对象，比如浏览器不支持的Object.assign方法和Promise全局对象，通过babel-polyfill编译，可以让浏览器
+    实现类似Object.assign和Promise的功能
+    3.jsx和flow插件
+    主要用来编译jsx语法和移除类型声明，使用react的时候会用到@babel/preset-react
+    
+    参考：https://www.jb51.net/article/135225.htm
+    https://blog.csdn.net/hsany330/article/details/89138760
+    
+    http://www.ruanyifeng.com/blog/2016/01/babel.html
+    ---阮一峰
+
+二十二，webpack构建速度和体积优化策略
+speed-measure-webpack-plugin：查看webpack打包时各个loader和plugin具体耗时
+webpack-bundle-analyzer：查看webpack打包后生成具体各个文件大小
+
+
+
+二十三，webpack多进程/多实例：使用thread-loader解析资源
+原理：每次webpack解析一个模块，thread-loader会将它及它的依赖分配给worker线程中
+{
+    test:/\.js$/,
+    use:[
+        {
+            loader:'thread-loader',
+            options:{
+                workers:os.cpus().length
+            }
+        },
+        'babel-loader'
+    ]
+}
+
+优化：从四个大方向入手：缓存、多核、抽离以及拆分
+    体积优化策略总结：
+        scope hoisting：减少函数声明和内存开销
+        tree shaking：只打包用到的模块方法，没有用到的不打包
+        公共资源分离：
+        1，html-webpack-externals-plugin
+        2，optimization:{splitChunks:{...}}
+        图片压缩
+        动态polyfill：
+        1，polyfill.io官方提供的服务
+        https://polyfill.io/v3/polyfill.min.js
+        2，基于polyfill.io官方自建polyfill服务
+        https://polyfill.io/v3/polyfill.min.js?features=Array.isArray%2CArray.from
+        
+    webpack打包速度优化
+    1，通过分析打包时各个loader和plugin的耗时，针对性优化对应代码，使用插件speed-measure-webpack-plugin
+    2，开启webpack多进程/多实例打包，使用thread-loader解析资源
+        
+    webpack打包文件体积优化
+        webpack-bundle-analyzer
+
+
+
+
+    
